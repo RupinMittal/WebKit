@@ -177,6 +177,8 @@ struct WEBCORE_EXPORT QuirksData {
     bool shouldDelayFullscreenEventWhenExitingPictureInPictureQuirk { false };
     bool shouldDisableEndFullscreenEventWhenEnteringPictureInPictureFromFullscreenQuirk { false };
 #endif
+
+    bool shouldDisableCookieStoreAPI { false };
 };
 
 } // namespace WebCore

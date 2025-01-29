@@ -27,7 +27,8 @@
 
 [
     EnabledBySetting=CookieStoreAPIEnabled,
-    SecureContext
+    SecureContext,
+    DisabledByQuirk=shouldDisableCookieStore
 ] partial interface DOMWindow {
     [SameObject] readonly attribute CookieStore cookieStore;
 };

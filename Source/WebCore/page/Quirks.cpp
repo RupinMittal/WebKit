@@ -1827,6 +1827,11 @@ bool Quirks::needsFacebookStoriesCreationFormQuirk(const Element& element, const
 #endif
 }
 
+bool Quirks::shouldDisableCookieStoreQuirk() const
+{
+    return m_quirksData.shouldDisableCookieStoreAPI;
+}
+
 URL Quirks::topDocumentURL() const
 {
     if (UNLIKELY(!m_topDocumentURLForTesting.isEmpty()))
@@ -2697,6 +2702,16 @@ static void handleZoomQuirks(QuirksData& quirksData, const URL& quirksURL, const
 #endif
 }
 
+static void handleMicrosoftQuirks(QuirksData& quirksData, const URL& quirksURL, const String& quirksDomainString, const URL& documentURL)
+{
+    if (quirksDomainString != "micosoft.com"_s)
+        return;
+
+    UNUSED_PARAM(quirksURL);
+    UNUSED_PARAM(documentURL);
+    quirksData.shouldDisableCookieStoreAPI = true;
+}
+
 void Quirks::determineRelevantQuirks()
 {
     RELEASE_ASSERT(m_document);
@@ -2848,6 +2863,7 @@ void Quirks::determineRelevantQuirks()
         { "zomato"_s, &handleZomatoQuirks },
 #endif
         { "zoom"_s, &handleZoomQuirks },
+        { "microsoft"_s, &handleMicrosoftQuirks },
     });
 
     auto findResult = dispatchMap->find(quirkDomainWithoutPSL);
