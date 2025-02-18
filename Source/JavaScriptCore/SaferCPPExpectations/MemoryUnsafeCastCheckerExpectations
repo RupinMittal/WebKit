@@ -25,7 +25,6 @@
 ./dfg/DFGOSRExitCompilerCommon.cpp
 ./dfg/DFGOperations.cpp
 ./disassembler/ARM64/A64DOpcode.cpp
-./disassembler/ARM64/A64DOpcode.h
 ./ftl/FTLState.cpp
 ./heap/ConservativeRoots.cpp
 ./heap/Heap.cpp
@@ -38,6 +37,7 @@
 ./inspector/JSJavaScriptCallFrame.cpp
 ./inspector/agents/InspectorDebuggerAgent.cpp
 ./interpreter/CallFrame.cpp
+./interpreter/CallFrame.h
 ./interpreter/Interpreter.cpp
 ./interpreter/StackVisitor.cpp
 ./jit/JITOperations.cpp
@@ -133,10 +133,10 @@ bytecode/Instruction.h
 bytecode/MetadataTable.h
 bytecode/RepatchInlines.h
 bytecompiler/BytecodeGenerator.h
+disassembler/ARM64/A64DOpcode.h
 heap/WeakBlock.h
 heap/WeakInlines.h
 inspector/InspectorProtocolObjects.h
-interpreter/CallFrame.h
 interpreter/CallFrameInlines.h
 jsc.cpp
 parser/ASTBuilder.h

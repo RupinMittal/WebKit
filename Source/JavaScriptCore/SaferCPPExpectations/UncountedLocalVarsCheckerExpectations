@@ -130,7 +130,6 @@
 ./wasm/js/JSWebAssemblyModule.cpp
 ./wasm/js/WasmToJS.cpp
 ./wasm/js/WebAssemblyModuleRecord.cpp
-./wasm/js/WebAssemblyTagPrototype.cpp
 API/JSCallbackObjectFunctions.h
 API/tests/testapi.cpp
 bytecompiler/StaticPropertyAnalyzer.h
@@ -149,7 +148,6 @@ runtime/JSCJSValueInlines.h
 runtime/JSSymbolTableObject.h
 runtime/KeyAtomStringCacheInlines.h
 runtime/Lookup.h
-runtime/PropertyName.h
 runtime/ScopedArguments.h
 runtime/StructureInlines.h
 runtime/SymbolTable.h
