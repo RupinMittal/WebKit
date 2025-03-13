@@ -2618,6 +2618,8 @@ imported/w3c/web-platform-tests/geolocation/disabled-by-permissions-policy.https
 imported/w3c/web-platform-tests/geolocation/enabled-by-permission-policy-attribute-redirect-on-load.https.sub.html [ Skip Slow ]
 imported/w3c/web-platform-tests/geolocation/enabled-by-permissions-policy.https.sub.html [ Skip Slow ]
 imported/w3c/web-platform-tests/geolocation/enabled-on-self-origin-by-permissions-policy.https.sub.html [ Skip Slow ]
+fast/dom/Geolocation/geolocation-permissions-query.html [ WontFix ]
+fast/dom/Geolocation/geolocation-permissions-query-fingerprinting.html [ WontFix ]
 
 # Per-process limit is only for WK2
 http/tests/websocket/tests/hybi/multiple-connections-limit.html [ Skip ]

@@ -11986,6 +11986,11 @@ void WebPageProxy::requestGeolocationPermissionForFrame(IPC::Connection& connect
     if (!frame)
         return;
 
+#if ENABLE(GEOLOCATION)
+    // Add origin to set of origins that have requested permission to use the Geolocation API.
+    internals().geolocationPermissionRequesters.add(frameInfo.securityOrigin);
+#endif
+
     auto request = internals().protectedGeolocationPermissionRequestManager()->createRequest(geolocationID, frame->protectedProcess());
     Function<void(bool)> completionHandler = [request = WTFMove(request)](bool allowed) {
         if (allowed)
@@ -12045,15 +12050,18 @@ void WebPageProxy::queryPermission(const ClientOrigin& clientOrigin, const Permi
     } else if (descriptor.name == PermissionName::Geolocation) {
 #if ENABLE(GEOLOCATION)
         name = "geolocation"_s;
-        // FIXME: We should set shouldChangeDeniedToPrompt after the first
-        // permission request like we do for notifications.
+
+        // Ensure that the true permission state of the Geolocation API is returned if
+        // this topOrigin has previously requested permission to use the Geolocation API.
+        if (internals().geolocationPermissionRequesters.contains(clientOrigin.topOrigin))
+            shouldChangeDeniedToPrompt = false;
 #endif
     } else if (descriptor.name == PermissionName::Notifications || descriptor.name == PermissionName::Push) {
 #if ENABLE(NOTIFICATIONS)
         name = "notifications"_s;
 
         // Ensure that the true permission state of the Notifications API is returned if
-        // this topOrigin has requested permission to use the Notifications API previously.
+        // this topOrigin has previously requested permission to use the Notifications API.
         if (internals().notificationPermissionRequesters.contains(clientOrigin.topOrigin))
             shouldChangeDeniedToPrompt = false;
 
@@ -12522,6 +12530,13 @@ void WebPageProxy::clearNotificationPermissionState()
     internals().notificationPermissionRequesters.clear();
     if (RefPtr pageForTesting = m_pageForTesting)
         pageForTesting->clearNotificationPermissionState();
+}
+#endif
+
+#if ENABLE(GEOLOCATION)
+void WebPageProxy::clearGeolocationPermissionState()
+{
+    internals().geolocationPermissionRequesters.clear();
 }
 #endif
 

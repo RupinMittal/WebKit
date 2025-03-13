@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<script src="../../../resources/js-test-pre.js"></script>
+</head>
+<body>
+<script>
+
+description("This test checks that Permissions::query() returns the true permission state of the Geolocation API.");
+
+window.jsTestIsAsync = true;
+
+function defaultTest()
+{
+    // No permission state is set.
+    navigator.permissions.query({ name: "geolocation" }).then((status)=>{
+        permissionsQueryResult = status.state;
+        shouldBeEqualToString("permissionsQueryResult", "prompt");
+
+        grantTest();
+    });
+}
+
+function grantTest()
+{
+    // Set permission state to 'granted'.
+    testRunner.setGeolocationPermission(true);
+
+    // Make a request to use the Geolocation API.
+    navigator.geolocation.getCurrentPosition(() => {});
+
+    navigator.permissions.query({ name: "geolocation" }).then((status)=>{
+        permissionsQueryResult = status.state;
+        shouldBeEqualToString("permissionsQueryResult", "granted");
+
+        denyTest();
+    });
+
+}
+
+function denyTest()
+{
+    // Set permission state to 'denied'.
+    testRunner.setGeolocationPermission(false);
+
+    // Make a request to use the Geolocation API.
+    navigator.geolocation.getCurrentPosition(() => {});
+
+    navigator.permissions.query({ name: "geolocation" }).then((status)=>{
+        permissionsQueryResult = status.state;
+        shouldBeEqualToString("permissionsQueryResult", "denied");
+
+        finishJSTest();
+    });
+}
+
+defaultTest();
+
+</script>
+<script src="../../../resources/js-test-post.js"></script>
+</body>
+</html>

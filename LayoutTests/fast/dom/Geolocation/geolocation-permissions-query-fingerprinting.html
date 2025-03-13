@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<script src="../../../resources/js-test-pre.js"></script>
+</head>
+<body>
+<script>
+
+description("This test tests the fingerprinting countermeasures implemented for querying the Geolocation API with Permissions::query().");
+
+window.jsTestIsAsync = true;
+
+function preRequestTest()
+{
+    // Set permission state to 'denied'.
+    testRunner.setGeolocationPermission(false);
+
+    navigator.permissions.query({ name: "geolocation" }).then((status)=>{
+        permissionsQueryResult = status.state;
+        shouldBeEqualToString("permissionsQueryResult", "prompt");
+
+        postRequestTest();
+    });
+}
+
+function postRequestTest()
+{
+    // Make a request to use the Geolocation API.
+    navigator.geolocation.getCurrentPosition(() => {});
+
+    navigator.permissions.query({ name: "geolocation" }).then((status)=>{
+        permissionsQueryResult = status.state;
+        shouldBeEqualToString("permissionsQueryResult", "denied");
+
+        finishJSTest();
+    });
+}
+
+preRequestTest();
+
+</script>
+<script src="../../../resources/js-test-post.js"></script>
+</body>
+</html>

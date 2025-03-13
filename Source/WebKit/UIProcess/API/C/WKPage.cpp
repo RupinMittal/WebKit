@@ -3441,6 +3441,13 @@ void WKPageClearNotificationPermissionState(WKPageRef pageRef)
 #endif
 }
 
+void WKPageClearGeolocationPermissionState(WKPageRef pageRef)
+{
+#if ENABLE(GEOLOCATION)
+    toImpl(pageRef)->clearGeolocationPermissionState();
+#endif
+}
+
 void WKPageExecuteCommandForTesting(WKPageRef pageRef, WKStringRef command, WKStringRef value)
 {
     toImpl(pageRef)->executeEditCommand(toImpl(command)->string(), toImpl(value)->string());

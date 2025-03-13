@@ -401,6 +401,10 @@ public:
     HashSet<WebCore::SecurityOriginData> notificationPermissionRequesters;
 #endif
 
+#if ENABLE(GEOLOCATION)
+    HashSet<WebCore::SecurityOriginData> geolocationPermissionRequesters;
+#endif
+
     CompletionHandler<void(bool)> serviceWorkerLaunchCompletionHandler;
 
 #if ENABLE(SPEECH_SYNTHESIS)

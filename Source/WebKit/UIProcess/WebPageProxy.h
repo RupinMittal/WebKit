@@ -2493,6 +2493,10 @@ public:
     void clearNotificationPermissionState();
 #endif
 
+#if ENABLE(GEOLOCATION)
+    void clearGeolocationPermissionState();
+#endif
+
 #if ENABLE(INTERACTION_REGIONS_IN_EVENT_REGION)
     void setInteractionRegionsEnabled(bool);
 #endif
