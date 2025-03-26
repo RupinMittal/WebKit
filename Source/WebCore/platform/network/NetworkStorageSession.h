@@ -152,6 +152,7 @@ public:
     CredentialStorage& credentialStorage() { return m_credentialStorage; }
 
 #ifdef __OBJC__
+    WEBCORE_EXPORT RetainPtr<NSHTTPCookieStorage> nsCookieStorageIfExists() const;
     WEBCORE_EXPORT RetainPtr<NSHTTPCookieStorage> nsCookieStorage() const;
 #endif
 

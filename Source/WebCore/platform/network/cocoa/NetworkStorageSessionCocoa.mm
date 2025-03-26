@@ -172,7 +172,7 @@ void NetworkStorageSession::setAllCookiesToSameSiteStrict(const RegistrableDomai
     END_BLOCK_OBJC_EXCEPTIONS
 }
 
-RetainPtr<NSHTTPCookieStorage> NetworkStorageSession::nsCookieStorage() const
+RetainPtr<NSHTTPCookieStorage> NetworkStorageSession::nsCookieStorageIfExists() const
 {
     ASSERT(hasProcessPrivilege(ProcessPrivilege::CanAccessRawCookies) || m_isInMemoryCookieStore);
     auto cfCookieStorage = cookieStorage();
@@ -180,7 +180,15 @@ RetainPtr<NSHTTPCookieStorage> NetworkStorageSession::nsCookieStorage() const
     if (!m_isInMemoryCookieStore && (!cfCookieStorage || [NSHTTPCookieStorage sharedHTTPCookieStorage]._cookieStorage == cfCookieStorage))
         return [NSHTTPCookieStorage sharedHTTPCookieStorage];
 
-    return adoptNS([[NSHTTPCookieStorage alloc] _initWithCFHTTPCookieStorage:cfCookieStorage.get()]);
+    return nullptr;
+}
+
+RetainPtr<NSHTTPCookieStorage> NetworkStorageSession::nsCookieStorage() const
+{
+    if (RetainPtr nsCookieStorage = nsCookieStorageIfExists())
+        return nsCookieStorage;
+
+    return adoptNS([[NSHTTPCookieStorage alloc] _initWithCFHTTPCookieStorage:cookieStorage().get()]);
 }
 
 CookieStorageObserver& NetworkStorageSession::cookieStorageObserver() const
@@ -875,8 +883,10 @@ void NetworkStorageSession::stopListeningForCookieChangeNotifications(CookieChan
             subscribedURLsChanged = true;
         }
     }
-    if (subscribedURLsChanged)
-        [nsCookieStorage() _setSubscribedDomainsForCookieChanges:m_subscribedDomainsForCookieChanges.get()];
+
+    RetainPtr nsCookieStorage = nsCookieStorageIfExists();
+    if (subscribedURLsChanged && nsCookieStorage)
+        [nsCookieStorage _setSubscribedDomainsForCookieChanges:m_subscribedDomainsForCookieChanges.get()];
 }
 
 #endif // HAVE(COOKIE_CHANGE_LISTENER_API)
