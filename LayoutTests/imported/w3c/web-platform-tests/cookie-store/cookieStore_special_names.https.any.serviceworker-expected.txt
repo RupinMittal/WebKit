@@ -16,4 +16,6 @@ PASS cookieStore.set with __Host- prefix a path option
 PASS cookieStore.set with __host- prefix and a domain option
 PASS cookieStore.set with __host- prefix a path option
 PASS cookieStore.set with malformed name.
+FAIL cookieStore.set a nameless cookie cannot have __Host- prefix promise_test: Unhandled rejection with value: object "TypeError: The cookie name and value must not both be empty."
+FAIL cookieStore.set a nameless cookie cannot have __Secure- prefix promise_test: Unhandled rejection with value: object "TypeError: The cookie name and value must not both be empty."
 
