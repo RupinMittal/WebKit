@@ -182,6 +182,7 @@ public:
     };
     Ref<AbortHandler> registerAbortHandler();
 
+    bool hasOngoingNavigateEvent() { return !!m_ongoingNavigateEvent; }
     RefPtr<NavigateEvent> protectedOngoingNavigateEvent() { return m_ongoingNavigateEvent; }
 
     void updateNavigationEntry(Ref<HistoryItem>&&, ShouldCopyStateObjectFromCurrentEntry);

@@ -372,6 +372,26 @@ void HistoryController::goToItem(HistoryItem& targetItem, FrameLoadType frameLoa
     goToItemShared(targetItem, WTFMove(finishGoToItem), processSwapDisposition);
 }
 
+static bool frameHasPreventDefault(LocalFrame& frame, Page& page)
+{
+    Ref navigation = frame.protectedWindow()->navigation();
+
+    // Skip if frame has an ongoing navigation event.
+    if (navigation->hasOngoingNavigateEvent())
+        return false;
+
+    // If a navigation event gets aborted, the frame must have preventDefault set.
+    // To check this, we use a dummy navigation (traverse to the already current item).
+    if (RefPtr currentItem = page.backForward().currentItem(frame.frameID())) {
+        Ref abortHandler = navigation->registerAbortHandler();
+        auto result = navigation->dispatchTraversalNavigateEvent(*currentItem);
+
+        return (result == Navigation::DispatchResult::Aborted || abortHandler->wasAborted());
+    }
+
+    return false;
+}
+
 struct HistoryController::FrameToNavigate {
     const Ref<LocalFrame> frame;
     const RefPtr<HistoryItem> fromItem;
@@ -402,6 +422,19 @@ void HistoryController::goToItemForNavigationAPI(HistoryItem& targetItem, FrameL
         // traversal should occur
         if (result == ShouldGoToHistoryItem::No)
             return;
+
+        // If any parent frames have blocked traversals (with preventDefault from JS),
+        // then this frame's traversal should be blocked as well.
+        auto parents = frame->tree().allParentsInAscendingOrder();
+        for (RefPtr parent : parents) {
+            RefPtr parentFrame = dynamicDowncast<LocalFrame>(parent.get());
+
+            if (parentFrame && frameHasPreventDefault(*parentFrame, *page)) {
+                triggeringFrame->protectedWindow()->protectedNavigation()->rejectFinishedPromise(tracker.get());
+
+                return;
+            }
+        }
 
         Vector<FrameToNavigate> framesToNavigate;
 

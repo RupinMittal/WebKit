@@ -64,6 +64,19 @@ Frame* FrameTree::parent() const
     return m_parent.get();
 }
 
+Vector<Frame*> FrameTree::allParentsInAscendingOrder() const
+{
+    Vector<Frame*> parents;
+
+    auto* parent = m_parent.get();
+    while (parent) {
+        parents.append(parent);
+        parent = parent->tree().parent();
+    }
+
+    return parents;
+}
+
 void FrameTree::appendChild(Frame& child)
 {
     ASSERT(child.page() == m_thisFrame->page());
