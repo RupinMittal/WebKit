@@ -1114,18 +1114,6 @@ void HistoryController::replaceState(RefPtr<SerializedScriptValue>&& stateObject
     }
 }
 
-void HistoryController::replaceCurrentItem(RefPtr<HistoryItem>&& item)
-{
-    if (!item)
-        return;
-
-    m_previousItem = nullptr;
-    if (m_provisionalItem)
-        m_provisionalItem = WTFMove(item);
-    else
-        m_currentItem = WTFMove(item);
-}
-
 RefPtr<HistoryItem> HistoryController::protectedCurrentItem() const
 {
     return m_currentItem;

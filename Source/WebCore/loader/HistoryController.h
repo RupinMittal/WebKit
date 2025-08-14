@@ -83,7 +83,6 @@ public:
     WEBCORE_EXPORT void setCurrentItem(Ref<HistoryItem>&&);
     void setCurrentItemTitle(const StringWithDirection&);
     bool currentItemShouldBeReplaced() const;
-    WEBCORE_EXPORT void replaceCurrentItem(RefPtr<HistoryItem>&&);
 
     HistoryItem* previousItem() const { return m_previousItem.get(); }
     RefPtr<HistoryItem> protectedPreviousItem() const;
