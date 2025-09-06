@@ -350,7 +350,7 @@ public:
         bool backwards = entry->index() < localFrame.window()->navigation().currentEntry()->index();
 
         RefPtr page { localFrame.page() };
-        auto items = page->checkedBackForward()->allItems();
+        auto items = page->checkedBackForward()->allItemsForFrame(page->mainFrame().frameID());
         for (size_t i = 0 ; i < items.size(); i++) {
             Ref item = items[backwards ? items.size() - 1 - i: i];
             auto index = item->children().findIf([&historyItem](const auto& child) {

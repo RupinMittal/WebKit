@@ -211,6 +211,23 @@ RefPtr<HistoryItem> BackForwardList::itemAtIndex(int index, WebCore::FrameIdenti
     return m_entries[index + m_current].copyRef();
 }
 
+Vector<Ref<WebCore::HistoryItem>> BackForwardList::allItemsForFrame(WebCore::FrameIdentifier frameID)
+{
+    Vector<Ref<HistoryItem>> allItemsForFrame;
+
+    for (auto& item : m_entries) {
+        if (item->frameID() == frameID) {
+            allItemsForFrame.append(item);
+            continue;
+        }
+
+        if (RefPtr childItem = item->childItemWithFrameID(frameID))
+            allItemsForFrame.append(childItem.releaseNonNull());
+    }
+
+    return allItemsForFrame;
+}
+
 #if PLATFORM(IOS_FAMILY)
 unsigned BackForwardList::current()
 {

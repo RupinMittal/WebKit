@@ -51,7 +51,7 @@ private:
 
     void goToItem(WebCore::HistoryItem&) override;
 
-    Vector<Ref<WebCore::HistoryItem>> allItems(WebCore::FrameIdentifier) final;
+    Vector<Ref<WebCore::HistoryItem>> allItemsForFrame(WebCore::FrameIdentifier) final;
     RefPtr<WebCore::HistoryItem> itemAtIndex(int, WebCore::FrameIdentifier) override;
 
     unsigned backListCount() const override;

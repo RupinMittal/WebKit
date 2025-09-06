@@ -7922,15 +7922,23 @@ void WebPageProxy::beginSafeBrowsingCheck(const URL&, API::Navigation&, bool for
 
 void WebPageProxy::decidePolicyForNavigationActionAsync(IPC::Connection& connection, NavigationActionData&& data, CompletionHandler<void(PolicyDecision&&)>&& completionHandler)
 {
-    RefPtr frame = WebFrameProxy::webFrame(data.frameInfo.frameID);
+    auto frameID = data.frameInfo.frameID;
+    RefPtr frame = WebFrameProxy::webFrame(frameID);
     if (!frame)
         return completionHandler({ });
 
+    Vector<Ref<FrameState>> backForwardList;
+    backForwardAllItemsForFrame(frameID, [&backForwardList](auto list) {
+        backForwardList = WTFMove(list);
+    });
+
     auto url = data.request.url();
     Ref process = WebProcessProxy::fromConnection(connection);
-    decidePolicyForNavigationAction(process.copyRef(), *frame, WTFMove(data), [completionHandler = WTFMove(completionHandler), process, url = WTFMove(url)] (PolicyDecision&& policyDecision) mutable {
+    decidePolicyForNavigationAction(process.copyRef(), *frame, WTFMove(data), [completionHandler = WTFMove(completionHandler), process, url = WTFMove(url), backForwardList = WTFMove(backForwardList)] (PolicyDecision&& policyDecision) mutable {
         if (policyDecision.policyAction == PolicyAction::Use && url.protocolIsFile())
             process->addPreviouslyApprovedFileURL(url);
+
+        policyDecision.backForwardList = WTFMove(backForwardList);
 
         completionHandler(WTFMove(policyDecision));
     });
@@ -8344,13 +8352,21 @@ void WebPageProxy::decidePolicyForNavigationActionSync(IPC::Connection& connecti
     };
     auto sender = PolicyDecisionSender::create(WTFMove(reply));
 
+    Vector<Ref<FrameState>> backForwardList;
+    backForwardAllItemsForFrame(frameID, [&backForwardList](auto list) {
+        backForwardList = WTFMove(list);
+    });
+
     auto navigationID = data.navigationID;
-    decidePolicyForNavigationAction(WTFMove(process), *frame, WTFMove(data), [sender] (auto&& policyDecision) {
+    decidePolicyForNavigationAction(WTFMove(process), *frame, WTFMove(data), [sender, backForwardList] (auto&& policyDecision) mutable {
+        policyDecision.backForwardList = WTFMove(backForwardList);
         sender->send(WTFMove(policyDecision));
     });
 
     // If the client did not respond synchronously, proceed with the load.
-    sender->send(PolicyDecision { isNavigatingToAppBoundDomain(), PolicyAction::Use, navigationID });
+    auto policyDecision = PolicyDecision { isNavigatingToAppBoundDomain(), PolicyAction::Use, navigationID };
+    policyDecision.backForwardList = WTFMove(backForwardList);
+    sender->send(WTFMove(policyDecision));
 }
 
 void WebPageProxy::decidePolicyForNewWindowAction(IPC::Connection& connection, NavigationActionData&& navigationActionData, const String& frameName, CompletionHandler<void(PolicyDecision&&)>&& completionHandler)
@@ -10131,22 +10147,16 @@ void WebPageProxy::backForwardGoToItemShared(BackForwardItemIdentifier itemID, C
     completionHandler(m_backForwardList->counts());
 }
 
-void WebPageProxy::backForwardAllItems(FrameIdentifier frameID, CompletionHandler<void(Vector<Ref<FrameState>>&&)>&& completionHandler)
+void WebPageProxy::backForwardAllItemsForFrame(FrameIdentifier frameID, CompletionHandler<void(Vector<Ref<FrameState>>&&)>&& completionHandler)
 {
-    Vector<Ref<FrameState>> allItems;
+    Vector<Ref<FrameState>> allItemsForFrame;
 
     for (Ref item : m_backForwardList->allItems()) {
-        RefPtr<FrameState> frameState;
-
         if (RefPtr frameItem = item->protectedMainFrameItem()->childItemForFrameID(frameID))
-            frameState = frameItem->copyFrameStateWithChildren();
-        else
-            frameState = item->mainFrameState();
-
-        allItems.append(frameState.releaseNonNull());
+            allItemsForFrame.append(frameItem->copyFrameStateWithChildren());
     }
 
-    completionHandler(WTFMove(allItems));
+    completionHandler(WTFMove(allItemsForFrame));
 }
 
 void WebPageProxy::backForwardItemAtIndex(int32_t index, FrameIdentifier frameID, CompletionHandler<void(RefPtr<FrameState>&&)>&& completionHandler)

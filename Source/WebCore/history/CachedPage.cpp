@@ -190,7 +190,7 @@ void CachedPage::restore(Page& page)
 
     // Update Navigation API after pageshow events to ensure correct event ordering.
     if (CheckedRef backForwardController = page.backForward(); page.settings().navigationAPIEnabled() && focusedDocument->window() && backForwardController->currentItem()) {
-        auto allItems = backForwardController->allItems();
+        auto allItems = backForwardController->allItemsForFrame(page.mainFrame().frameID());
         Ref currentItem = *backForwardController->currentItem();
         RefPtr previousItem = backForwardController->forwardItem();
         focusedDocument->window()->navigation().updateForReactivation(WTFMove(allItems), currentItem, previousItem.get());
@@ -207,12 +207,12 @@ void CachedPage::restore(Page& page)
             if (!document || !document->window())
                 continue;
             // For iframes, get only the reachable history items from the current session.
-            auto reachableFrameItems = backForwardController->reachableItemsForFrame(child->frameID());
+            auto allItemsForChild = backForwardController->allItemsForFrame(child->frameID());
 
-            if (!reachableFrameItems.isEmpty() && child->loader().history().currentItem()) {
+            if (!allItemsForChild.isEmpty() && child->loader().history().currentItem()) {
                 Ref currentItem = *child->loader().history().currentItem();
                 RefPtr previousItem = backForwardController->forwardItem();
-                document->window()->navigation().updateForReactivation(WTFMove(reachableFrameItems), currentItem, previousItem.get());
+                document->window()->navigation().updateForReactivation(WTFMove(allItemsForChild), currentItem, previousItem.get());
             }
         }
     }

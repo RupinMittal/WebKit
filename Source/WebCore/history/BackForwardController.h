@@ -74,9 +74,7 @@ public:
     WEBCORE_EXPORT RefPtr<HistoryItem> currentItem(std::optional<FrameIdentifier> = std::nullopt);
     WEBCORE_EXPORT RefPtr<HistoryItem> forwardItem(std::optional<FrameIdentifier> = std::nullopt);
 
-    Vector<Ref<HistoryItem>> allItems();
-    Vector<Ref<HistoryItem>> itemsForFrame(FrameIdentifier);
-    Vector<Ref<HistoryItem>> reachableItemsForFrame(FrameIdentifier);
+    Vector<Ref<HistoryItem>> allItemsForFrame(FrameIdentifier);
 
 private:
     Ref<Page> protectedPage() const;

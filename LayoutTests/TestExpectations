@@ -7091,6 +7091,9 @@ imported/w3c/web-platform-tests/navigation-api/navigate-event/cross-window/open-
 imported/w3c/web-platform-tests/navigation-api/navigate-event/cross-window/submit-crossdocument-crossorigin-sameorigindomain.sub.html [ Skip ]
 imported/w3c/web-platform-tests/navigation-api/navigate-event/cross-window/submit-samedocument-crossorigin-sameorigindomain.sub.html [ Skip ]
 
+webkit.org/b/298466 imported/w3c/web-platform-tests/navigation-api/navigation-history-entry/entries-after-cross-document-forward-pruning.html [ Failure ]
+webkit.org/b/298467 imported/w3c/web-platform-tests/navigation-api/navigation-methods/navigate-history-push-same-url-cross-document.html [ Failure ]
+
 # General flakes, almost exclusively on mac-wk2-stress.
 imported/w3c/web-platform-tests/navigation-api/navigation-methods/return-value/back-204-205-download.html [ Failure Pass ]
 imported/w3c/web-platform-tests/navigation-api/navigation-methods/return-value/navigate-intercept-rejected.html [ Crash Pass ]

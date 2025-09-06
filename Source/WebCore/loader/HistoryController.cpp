@@ -603,11 +603,14 @@ void HistoryController::updateForRedirectWithLockedBackForwardList()
         // The client redirect replaces the current history item.
         updateCurrentItem();
     } else {
-        RefPtr page = m_frame->page();
-        RefPtr parentFrame = dynamicDowncast<LocalFrame>(m_frame->tree().parent());
+        Ref frame = m_frame.get();
+        RefPtr page = frame->page();
+        RefPtr parentFrame = dynamicDowncast<LocalFrame>(frame->tree().parent());
+
         if (page && parentFrame) {
             if (RefPtr parentCurrentItem = parentFrame->loader().history().currentItem()) {
                 Ref item = createItem(page->historyItemClient(), parentCurrentItem->itemID());
+                frame->addItemToBackForwardList(Ref { item });
                 parentCurrentItem->setChildItem(item.copyRef());
                 page->checkedBackForward()->setChildItem(parentCurrentItem->frameItemID(), WTFMove(item));
             }
@@ -675,6 +678,26 @@ void HistoryController::updateForCommit()
             if (localFrame->loader().history().isFrameLoadComplete())
                 localFrame->loader().history().recursiveUpdateForCommit();
         }
+
+        return;
+    }
+
+    if (m_currentItem) {
+        if (RefPtr localFrame = dynamicDowncast<LocalFrame>(m_frame->mainFrame())) {
+            if (localFrame->loader().history().isFrameLoadComplete())
+                localFrame->loader().history().recursiveSetCurrentItemID(m_currentItem->itemID());
+        }
+    }
+}
+
+void HistoryController::recursiveSetCurrentItemID(BackForwardItemIdentifier itemID)
+{
+    if (m_currentItem)
+        m_currentItem->setItemID(itemID);
+
+    for (RefPtr child = m_frame->tree().firstChild(); child; child = child->tree().nextSibling()) {
+        if (auto* localChild = dynamicDowncast<LocalFrame>(child.get()))
+            localChild->loader().history().recursiveSetCurrentItemID(itemID);
     }
 }
 
@@ -1008,8 +1031,12 @@ void HistoryController::updateBackForwardListClippedAtTarget(bool doClip)
     RefPtr item = frame->loader().protectedClient()->createHistoryItemTree(doClip, BackForwardItemIdentifier::generate());
     if (!item)
         return;
+
+    Ref historyItem = item.releaseNonNull();
+    frame->addItemToBackForwardList(Ref { historyItem });
+
     LOG(History, "HistoryController %p updateBackForwardListClippedAtTarget: Adding backforward item %p in frame %p (main frame %d) %s", this, item.get(), m_frame.ptr(), m_frame->isMainFrame(), m_frame->loader().documentLoader()->url().string().utf8().data());
-    page->checkedBackForward()->addItem(item.releaseNonNull());
+    page->checkedBackForward()->addItem(WTFMove(historyItem));
 }
 
 void HistoryController::updateCurrentItem()

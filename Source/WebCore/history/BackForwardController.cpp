@@ -175,32 +175,9 @@ RefPtr<HistoryItem> BackForwardController::itemAtIndex(int i, std::optional<Fram
     return m_client->itemAtIndex(i, frameID.value_or(m_page->mainFrame().frameID()));
 }
 
-Vector<Ref<HistoryItem>> BackForwardController::allItems()
+Vector<Ref<HistoryItem>> BackForwardController::allItemsForFrame(FrameIdentifier frameID)
 {
-    return m_client->allItems(m_page->mainFrame().frameID());
-}
-
-Vector<Ref<HistoryItem>> BackForwardController::itemsForFrame(FrameIdentifier frameID)
-{
-    Vector<Ref<HistoryItem>> historyItems;
-    for (Ref item : allItems()) {
-        if (item->frameID() == frameID)
-            historyItems.append(WTFMove(item));
-    }
-
-    return historyItems;
-}
-
-Vector<Ref<HistoryItem>> BackForwardController::reachableItemsForFrame(FrameIdentifier frameID)
-{
-    // Returns only the frame items that correspond to the currently reachable session history.
-    // This is different from itemsForFrame() which returns all frame items across the frame's lifetime.
-    Vector<Ref<HistoryItem>> reachableFrameItems;
-    for (auto& item : allItems()) {
-        if (RefPtr childItem = item->childItemWithFrameID(frameID))
-            reachableFrameItems.append(childItem.releaseNonNull());
-    }
-    return reachableFrameItems;
+    return m_client->allItemsForFrame(frameID);
 }
 
 void BackForwardController::close()

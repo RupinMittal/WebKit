@@ -1599,6 +1599,28 @@ RefPtr<SecurityOrigin> LocalFrame::frameDocumentSecurityOrigin() const
     return nullptr;
 }
 
+Vector<Ref<HistoryItem>> LocalFrame::backForwardList() const
+{
+    return m_backForwardList;
+}
+
+void LocalFrame::setBackForwardList(Vector<Ref<HistoryItem>>&& list)
+{
+    m_backForwardList = WTFMove(list);
+}
+
+void LocalFrame::addItemToBackForwardList(Ref<HistoryItem>&& item)
+{
+    for (size_t i = 0; i < m_backForwardList.size(); i++) {
+        if (m_backForwardList[i]->itemID().object() <=> item->itemID().object() == std::strong_ordering::equal) {
+            m_backForwardList[i] = WTFMove(item);
+            return;
+        }
+    }
+
+    m_backForwardList.append(WTFMove(item));
+}
+
 } // namespace WebCore
 
 #undef FRAME_RELEASE_LOG_ERROR
